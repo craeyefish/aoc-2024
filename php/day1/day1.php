@@ -8,7 +8,6 @@ class AdventSolver {
     public function __construct($inputFile) {
         $this->input = file($inputFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-        // Solution code
         foreach ($this->input as $line) {
             $vals = array_map('intval',explode("  ", $line));
 
