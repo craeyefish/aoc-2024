@@ -20,8 +20,8 @@ function q1() {
 
 function q2() {
   let xmases = 0;
-  for (let y = 0; y < lines.length; y++) {
-    for (let x = 0; x < lines[0].length; x++) {
+  for (let y = 1; y < lines.length - 2; y++) {
+    for (let x = 1; x < lines[0].length - 2; x++) {
       xmases += findMasMas(x, y);
     }
   }
@@ -111,32 +111,16 @@ function findMasMas(posx, posy) {
     return 0;
   }
 
-  if (
-    lines.length > posy + 1 &&
-    lines[posy].length > posx + 1 &&
-    (lines[posy + 1][posx + 1] == "M" || lines[posy + 1][posx + 1] == "S")
-  ) {
+  if (lines[posy + 1][posx + 1] == "M" || lines[posy + 1][posx + 1] == "S") {
     found += lines[posy + 1][posx + 1];
   }
-  if (
-    posy - 1 >= 0 &&
-    lines[posy].length > posx + 1 &&
-    (lines[posy - 1][posx + 1] == "M" || lines[posy - 1][posx + 1] == "S")
-  ) {
+  if (lines[posy - 1][posx + 1] == "M" || lines[posy - 1][posx + 1] == "S") {
     found += lines[posy - 1][posx + 1];
   }
-  if (
-    posy - 1 >= 0 &&
-    posx - 1 >= 0 &&
-    (lines[posy - 1][posx - 1] == "M" || lines[posy - 1][posx - 1] == "S")
-  ) {
+  if (lines[posy - 1][posx - 1] == "M" || lines[posy - 1][posx - 1] == "S") {
     found += lines[posy - 1][posx - 1];
   }
-  if (
-    lines.length > posy + 1 &&
-    posx - 1 >= 0 &&
-    (lines[posy + 1][posx - 1] == "M" || lines[posy + 1][posx - 1] == "S")
-  ) {
+  if (lines[posy + 1][posx - 1] == "M" || lines[posy + 1][posx - 1] == "S") {
     found += lines[posy + 1][posx - 1];
   }
 
