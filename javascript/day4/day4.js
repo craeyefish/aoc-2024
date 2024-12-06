@@ -111,18 +111,11 @@ function findMasMas(posx, posy) {
     return 0;
   }
 
-  if (lines[posy + 1][posx + 1] == "M" || lines[posy + 1][posx + 1] == "S") {
-    found += lines[posy + 1][posx + 1];
-  }
-  if (lines[posy - 1][posx + 1] == "M" || lines[posy - 1][posx + 1] == "S") {
-    found += lines[posy - 1][posx + 1];
-  }
-  if (lines[posy - 1][posx - 1] == "M" || lines[posy - 1][posx - 1] == "S") {
-    found += lines[posy - 1][posx - 1];
-  }
-  if (lines[posy + 1][posx - 1] == "M" || lines[posy + 1][posx - 1] == "S") {
-    found += lines[posy + 1][posx - 1];
-  }
+  found =
+    lines[posy + 1][posx + 1] +
+    lines[posy - 1][posx + 1] +
+    lines[posy - 1][posx - 1] +
+    lines[posy + 1][posx - 1];
 
   let acceptable = ["MSSM", "SSMM", "SMMS", "MMSS"];
   for (let str of acceptable) {
@@ -135,3 +128,4 @@ function findMasMas(posx, posy) {
 }
 
 main();
+// 1813
