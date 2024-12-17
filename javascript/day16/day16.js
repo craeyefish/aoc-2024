@@ -2,21 +2,23 @@ const fs = require("fs");
 
 const lines = fs.readFileSync("input.txt", "utf8").split("\n").filter(Boolean);
 
-let start = 0;
-let end = 0;
-let grid = [];
-let grid2 = [];
-let gridF = [];
-let lowestScore = 0;
-
 class Point {
-  constructor(x, y, dir, score) {
+  constructor(x, y, dir, score, hist = []) {
     this.x = x;
     this.y = y;
     this.dir = dir;
     this.score = score;
+    this.hist = Array.isArray(hist) ? [...hist] : [];
   }
 }
+
+let start = 0;
+let end = 0;
+let grid = [];
+let grid2 = [];
+let lowest = new Point(0, 0, "E", 0, []);
+let complete = [];
+let q2Total = 1;
 
 function printGrid() {
   grid.forEach((row) => {
@@ -44,9 +46,23 @@ function printGrid() {
   });
 }
 
+function printGrid2() {
+  grid2.forEach((row) => {
+    r = "";
+    row.forEach((element) => {
+      r += element;
+      if (element == "0") {
+        q2Total++;
+      }
+    });
+    console.log(r);
+  });
+}
+
 function main() {
   for (let y = 0; y < lines.length; y++) {
     let gridLine = [];
+    let gridLine2 = [];
     for (let x = 0; x < lines[0].length; x++) {
       switch (lines[y][x]) {
         case "#":
@@ -62,8 +78,10 @@ function main() {
           gridLine.push(-3);
           break;
       }
+      gridLine2.push(lines[y][x]);
     }
     grid.push(gridLine);
+    grid2.push(gridLine2);
 
     if (lines[y].includes("S")) {
       start = [lines[y].indexOf("S"), y];
@@ -73,14 +91,6 @@ function main() {
     }
   }
 
-  gridF = Array(lines.length)
-    .fill()
-    .map(() => Array(lines[0].length).fill(0));
-  for (var i = 0; i < grid.length; i++) grid2[i] = grid[i].slice();
-
-  console.log(start);
-  console.log(end);
-
   q1();
   q2();
 }
@@ -89,66 +99,112 @@ function flood(points) {
   let smallestPoint = 0;
   let index = 0;
 
-  // for (let i = 0; i < points.length; i++) {
-  //   if (smallestPoint == 0 || points[i].score < smallestPoint) {
-  //     smallestPoint = points[i].score;
-  //     index = i;
-  //   }
-  // }
-
-  points.sort((a, b) => a.score - b.score);
-  index = Math.floor(Math.random() * points.length);
-  if (points.length > 20) {
-    index = Math.floor(Math.random() * 20);
+  // Move smallest
+  for (let i = 0; i < points.length; i++) {
+    if (smallestPoint == 0 || points[i].score < smallestPoint) {
+      smallestPoint = points[i].score;
+      index = i;
+    }
   }
 
   let point = points[index];
   points.splice(index, 1);
   let newPoints = [];
+  point.hist.push([point.x, point.y]);
 
   // check up
   if (grid[point.y - 1][point.x] == 0 || grid[point.y - 1][point.x] == -3) {
     if (point.dir == "N") {
       newPoints.push(
-        new Point(point.x, point.y - 1, point.dir, point.score + 1)
+        new Point(point.x, point.y - 1, point.dir, point.score + 1, point.hist)
       );
     }
     if (point.dir == "W" || point.dir == "E") {
-      newPoints.push(new Point(point.x, point.y, "N", point.score + 1000));
+      newPoints.push(
+        new Point(point.x, point.y, "N", point.score + 1000, point.hist)
+      );
     }
+  }
+  if (point.dir == "N" && grid[point.y - 1][point.x] > 0) {
+    let jc = 1;
+    // Try to jump.
+    while (grid[point.y - 1 - jc][point.x] > 0) {
+      jc++;
+    }
+    newPoints.push(
+      new Point(point.x, point.y - jc, point.dir, point.score + jc, point.hist)
+    );
   }
   // check right
   if (grid[point.y][point.x + 1] == 0 || grid[point.y][point.x + 1] == -3) {
     if (point.dir == "E") {
       newPoints.push(
-        new Point(point.x + 1, point.y, point.dir, point.score + 1)
+        new Point(point.x + 1, point.y, point.dir, point.score + 1, point.hist)
       );
     }
     if (point.dir == "N" || point.dir == "S") {
-      newPoints.push(new Point(point.x, point.y, "E", point.score + 1000));
+      newPoints.push(
+        new Point(point.x, point.y, "E", point.score + 1000, point.hist)
+      );
     }
+  }
+  if (point.dir == "E" && grid[point.y][point.x + 1] > 0) {
+    let jc = 1;
+    // Try to jump.
+    while (grid[point.y][point.x + 1 + jc] > 0) {
+      jc++;
+    }
+    newPoints.push(
+      new Point(point.x + jc, point.y, point.dir, point.score + jc, point.hist)
+    );
   }
   // check down
   if (grid[point.y + 1][point.x] == 0 || grid[point.y + 1][point.x] == -3) {
     if (point.dir == "S") {
       newPoints.push(
-        new Point(point.x, point.y + 1, point.dir, point.score + 1)
+        new Point(point.x, point.y + 1, point.dir, point.score + 1, point.hist)
       );
     }
     if (point.dir == "W" || point.dir == "E") {
-      newPoints.push(new Point(point.x, point.y, "S", point.score + 1000));
+      newPoints.push(
+        new Point(point.x, point.y, "S", point.score + 1000, point.hist)
+      );
     }
+  }
+  if (point.dir == "S" && grid[point.y + 1][point.x] > 0) {
+    let jc = 1;
+    // Try to jump.
+    while (grid[point.y + 1 + jc][point.x] > 0) {
+      jc++;
+    }
+    newPoints.push(
+      new Point(point.x, point.y + jc, point.dir, point.score + jc, point.hist)
+    );
   }
   // check left
   if (grid[point.y][point.x - 1] == 0 || grid[point.y][point.x - 1] == -3) {
     if (point.dir == "W") {
       newPoints.push(
-        new Point(point.x - 1, point.y, point.dir, point.score + 1)
+        new Point(point.x - 1, point.y, point.dir, point.score + 1, point.hist)
       );
     }
     if (point.dir == "N" || point.dir == "S") {
-      newPoints.push(new Point(point.x, point.y, "W", point.score + 1000));
+      newPoints.push(
+        new Point(point.x, point.y, "W", point.score + 1000, point.hist)
+      );
     }
+  }
+  if (point.dir == "W" && grid[point.y][point.x - 1] > 0) {
+    let jc = 1;
+    // Try to jump.
+    while (grid[point.y][point.x - 1 - jc] > 0) {
+      jc++;
+    }
+    newPoints.push(
+      new Point(point.x - jc, point.y, point.dir, point.score + jc, point.hist)
+    );
+    point.x -= jc;
+    point.score += jc;
   }
 
   let uniquePoints = [];
@@ -166,9 +222,9 @@ function flood(points) {
     });
 
     if (grid[point.y][point.x] == -3) {
-      if (lowestScore == 0 || point.score < lowestScore) {
-        lowestScore = point.score;
-        console.log(point.score);
+      complete.push(point);
+      if (lowest.score == 0 || point.score < lowest.score) {
+        lowest = point;
       }
 
       return;
@@ -191,30 +247,25 @@ function flood(points) {
 }
 
 function q1() {
-  let q1Total = 0;
   let points = [new Point(start[0], start[1], "E", 0)];
 
   while (points.length > 0) {
     flood(points);
   }
 
-  console.log(q1Total); // 91372 too high, 79412 too high, 79404 CORRECT!!! (with a bit of luck)
+  console.log(lowest.score);
 }
 
 function q2() {
-  let q2Total = 0;
-  let count = 0;
-
-  while (count++ < 10000) {
-    let points = [new Point(start[0], start[1], "E", 0)];
-
-    while (points.length > 0) {
-      flood(points);
+  complete.forEach((point) => {
+    if (point.score == lowest.score) {
+      point.hist.forEach((p) => {
+        grid2[p[1]][p[0]] = "0";
+      });
     }
+  });
 
-    for (var i = 0; i < grid.length; i++) grid[i] = grid2[i].slice();
-  }
-
+  printGrid2();
   console.log(q2Total);
 }
 
