@@ -91,8 +91,6 @@ function q2() {
       }
     }
 
-    lineCount = 0;
-    matchNext2(lines[i], towels, solvedMap);
     total += lineCount;
   }
   console.log(total);
