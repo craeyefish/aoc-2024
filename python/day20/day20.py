@@ -34,86 +34,63 @@ def main():
                     racetrack.append([x,y])
                     if grid[y][x] == '.':
                         grid[y][x] = 'O'
-     
-    for line in lines:
-        print(" ".join(line)+'\n')
-
-
 
     q1(grid, racetrack)
-    q2()
+    q2(grid, racetrack)
     return
-
-def calcScore(grid, cheat, start):
-    tempGrid = [row[:] for row in grid]
-    tempGrid[cheat[1]][cheat[0]] = 'O'
-
-    newSpots = [start]
-    count = 0
-
-    while 1:
-        count+=1
-        tSpots = []
-        for spot in newSpots:
-            x = spot[0]
-            y = spot[1]
-            tempGrid[y][x] = '+'
-
-            for i in [-1, 0, 1]:
-                for j in [-1, 0,  1]:
-                    if abs(i) == abs(j):
-                        continue
-                    if tempGrid[y+j][x+i] == 'O':
-                        tSpots.append([x+i,y+j])
-                    if tempGrid[y+j][x+i] == 'E':
-                        return count
-        newSpots = tSpots
-
-
 
 
 def q1(grid, track):
     total = 0
-    calculatedSpots = []
-    ogScore = calcScore(grid, [0, 0], track[0])
 
-    count = 0
     for spot in track:
-        count += 1
         x = spot[0]
         y = spot[1]
 
         # left
-        if x -2 > 0 and (grid[y][x-2] == 'O' or grid[y][x-2] == 'E')  and grid[y][x-1] == '#' and calculatedSpots.count([x-1, y]) == 0:
-            if ogScore - calcScore(grid, [x-1, y], track[0]) >= 100:
+        if x -2 > 0 and (grid[y][x-2] == 'O' or grid[y][x-2] == 'E')  and grid[y][x-1] == '#':
+            score = track.index([x-2, y]) - track.index([x, y]) - 2
+            if score >= 100:
                 total+=1
-            calculatedSpots.append([x-1, y])
 
         # up
-        if y -2 > 0 and (grid[y-2][x] == 'O' or grid[y-2][x] == 'E')  and grid[y-1][x] == '#' and calculatedSpots.count([x, y-1]) == 0:
-            if ogScore - calcScore(grid, [x, y-1], track[0]) >= 100:
+        if y -2 > 0 and (grid[y-2][x] == 'O' or grid[y-2][x] == 'E')  and grid[y-1][x] == '#':
+            score = track.index([x, y-2]) - track.index([x, y]) - 2
+            if score >= 100:
                 total+=1
-            calculatedSpots.append([x, y-1])
 
         # right
-        if x + 2 < len(grid[x]) - 1 and (grid[y][x+2] == 'O' or grid[y][x+2] == 'E')  and grid[y][x+1] == '#' and calculatedSpots.count([x+1, y]) == 0:
-            if ogScore - calcScore(grid, [x+1, y], track[0]) >= 100:
+        if x + 2 < len(grid[x]) - 1 and (grid[y][x+2] == 'O' or grid[y][x+2] == 'E')  and grid[y][x+1] == '#':
+            score = track.index([x + 2, y]) - track.index([x, y]) - 2
+            if score >= 100:
                 total+=1
-            calculatedSpots.append([x+1, y])
 
         # down
-        if y + 2 < len(grid) - 1 and (grid[y+2][x] == 'O' or grid[y+2][x] == 'E')  and grid[y+1][x] == '#' and calculatedSpots.count([x, y+1]) == 0:
-            if ogScore - calcScore(grid, [x, y+1], track[0]) >= 100:
+        if y + 2 < len(grid) - 1 and (grid[y+2][x] == 'O' or grid[y+2][x] == 'E')  and grid[y+1][x] == '#':
+            score = track.index([x, y+2]) - track.index([x, y]) - 2
+            if score >= 100:
                 total+=1
-            calculatedSpots.append([x, y+1])
 
     
     print(total)
     return
 
-def q2():
+def q2(grid, track):
     total = 0
 
+    for spot in track: 
+        x = spot[0]
+        y = spot[1]
+
+        for dy in range(-20, 21):
+            for dx in range(-20,21):
+                if abs(dy) + abs(dx) > 20:
+                    continue 
+
+                if x + dx > 0 and x + dx < len(grid[0]) and y + dy > 0 and y + dy < len(grid) and (grid[y+dy][x+dx] == 'O' or grid[y+dy][x+dx] == 'E'):
+                    score = track.index([x + dx, y + dy]) - track.index([x, y]) - abs(dx) - abs(dy)
+                    if score >= 100:
+                        total += 1
 
     print(total)
     return
